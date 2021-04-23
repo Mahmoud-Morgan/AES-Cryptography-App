@@ -69,6 +69,9 @@ void encrypt(FILE *inputFile, FILE *outputFile, int encryptionKey)
         fputc(encryptedChart, outputFile);
         c = fgetc(inputFile);
     }
+
+    fclose(inputFile);
+    fclose(outputFile);
 }
 
 void decrypt(FILE *inputFile, FILE *outputFile, int encryptionKey)
@@ -83,6 +86,8 @@ void decrypt(FILE *inputFile, FILE *outputFile, int encryptionKey)
         fputc(encryptedChart, outputFile);
         c = fgetc(inputFile);
     }
+    fclose(inputFile);
+    fclose(outputFile);
 }
 
 char prpuosActionEncryptOrDecrypt() //TODO need to check the duplication
@@ -106,7 +111,6 @@ int main()
 {
     char checkEncryptOrDecrypt = prpuosActionEncryptOrDecrypt();
     int encryptionKey = getEncryptionKey();
-
     FILE *inputFile = getInputFile();
     FILE *outputFile = getOutputFile();
 
@@ -122,9 +126,5 @@ int main()
     }
 
     printf("\n process ended successfully \n");
-
-    fclose(inputFile);
-    fclose(outputFile);
-
     return 0;
 }
