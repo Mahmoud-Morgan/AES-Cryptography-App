@@ -57,14 +57,32 @@ int getEncryptionKey()
     return encryptionKey;
 }
 
-void encrypt()
+void encrypt(FILE *inputFile, FILE *outputFile, int encryptionKey)
 {
-    //
+    // Read contents from file
+    char content;
+    c = fgetc(inputFile);
+    char encryptedChart;
+    while (content != EOF)
+    {
+        encryptedChart = content + encryptionKey; //encryption
+        fputc(encryptedChart, outputFile);
+        c = fgetc(inputFile);
+    }
 }
 
-void decrypt()
+void decrypt(FILE *inputFile, FILE *outputFile, int encryptionKey)
 {
-    //
+    // Read contents from file
+    char content;
+    c = fgetc(inputFile);
+    char encryptedChart;
+    while (content != EOF)
+    {
+        encryptedChart = content - encryptionKey; //decryption
+        fputc(encryptedChart, outputFile);
+        c = fgetc(inputFile);
+    }
 }
 
 char prpuosActionEncryptOrDecrypt() //TODO need to check the duplication
@@ -86,7 +104,6 @@ char prpuosActionEncryptOrDecrypt() //TODO need to check the duplication
 
 int main()
 {
-
     char checkEncryptOrDecrypt = prpuosActionEncryptOrDecrypt();
     int encryptionKey = getEncryptionKey();
 
@@ -97,26 +114,14 @@ int main()
     switch (checkEncryptOrDecrypt)
     {
     case 'e':
-        encrypt();
+        encrypt(inputFile,outputFile,encryptionKey);
         break;
     case 'd':
-        decrypt();
+        decrypt(inputFile,outputFile,encryptionKey);
         break;
     }
 
-    // Read contents from file
-    char c;
-    c = fgetc(inputFile);
-    char encryptedChart;
-    while (c != EOF)
-    {
-        encryptedChart = c + encryptionKey; //encryption
-
-        fputc(encryptedChart, outputFile);
-        c = fgetc(inputFile);
-    }
-
-    printf("\n Contents copied \n");
+    printf("\n process ended successfully \n");
 
     fclose(inputFile);
     fclose(outputFile);
