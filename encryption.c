@@ -73,18 +73,16 @@ void countCharts()
     chartsNumber = 0;
     char c;
     c = fgetc(inputFile);
-    // Extract characters from file
-    // and store in character c
     while (c != EOF)
     {
-        // Increment count for this character
         chartsNumber++;
         c = fgetc(inputFile);
     }
     rewind(inputFile);
+    printf("number of charts = %d \n",chartsNumber);
 }
 
-void countNumberOfBlocks()
+void countNumberOfBlocksForEncryption()
 {
     if (fmod(chartsNumber, keyLength) == 0)
     {
@@ -94,6 +92,18 @@ void countNumberOfBlocks()
     {
         numberOfBlocks = (chartsNumber / keyLength) + 1;
     }
+    printf("Number Of Blocks For Encryption = %d \n",numberOfBlocks);
+}
+
+
+void countNumberOfBlocksForDecryption()
+{
+    if (fmod(chartsNumber, keyLength) != 0)
+    {
+        printf("please enter file that encrypted by this app \n");
+        numberOfBlocks = (chartsNumber / keyLength);
+    }
+    numberOfBlocks = (chartsNumber / keyLength);
 }
 
 static void phex(uint8_t *str)
@@ -162,7 +172,8 @@ void printuintToChar(uint8_t *codedText, int codedTextSize)
 
 void encryption()
 {
-        uint8_t textToEncrypt[chartsNumber];
+    countNumberOfBlocksForEncryption();
+    uint8_t textToEncrypt[chartsNumber];
     char content;
     unsigned long long int j = 0;
     for (j = 0; j < chartsNumber; j++)
@@ -205,8 +216,7 @@ int main()
 
     getInputFile();
     countCharts();
-    countNumberOfBlocks();
-   
+
     FILE *KeyFile = getEncryptionKeyFile(); // 128bit key
     getEncryptionKey(KeyFile);
 
