@@ -10,17 +10,16 @@ static char checkEncryptOrDecrypt;
 static FILE *inputFile;
 
 #if defined(AES256)
-   const uint8_t len = 32;
+const uint8_t len = 32;
 #elif defined(AES192)
-   const uint8_t len = 24;
+const uint8_t len = 24;
 #elif defined(AES128)
-   const uint8_t len = 16;
+const uint8_t len = 16;
 #endif
 static const int keyLength = 16; // 128bit key
 static uint8_t encryptionKey[keyLength];
 static unsigned long long int chartsNumber;
 static unsigned long int numberOfBlocks;
-
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -79,7 +78,7 @@ void countCharts()
         c = fgetc(inputFile);
     }
     rewind(inputFile);
-    printf("number of charts = %d \n",chartsNumber);
+    printf("number of charts = %d \n", chartsNumber);
 }
 
 void countNumberOfBlocksForEncryption()
@@ -92,26 +91,25 @@ void countNumberOfBlocksForEncryption()
     {
         numberOfBlocks = (chartsNumber / keyLength) + 1;
     }
-    printf("Number Of Blocks For Encryption = %d \n",numberOfBlocks);
+    printf("Number Of Blocks For Encryption = %d \n", numberOfBlocks);
 }
-
 
 void countNumberOfBlocksForDecryption()
 {
     if (fmod(chartsNumber, keyLength) != 0)
     {
         printf("please enter file that encrypted by this app \n");
-        numberOfBlocks = (chartsNumber / keyLength);
     }
-    numberOfBlocks = (chartsNumber / keyLength);
+    numberOfBlocks = (chartsNumber / (2 * keyLength));
+    printf("Number Of Blocks For Decryption = %d \n", numberOfBlocks);
 }
 
 static void phex(uint8_t *str)
 {
-    unsigned char i;
-    for (i = 0; i < keyLength; ++i)
+    for (int i = 0; i < keyLength; ++i)
+    {
         printf("%.2x", str[i]);
-    printf("\n");
+    }
 }
 
 uint8_t getPlainText(unsigned long long int *chartsNumber)
@@ -183,22 +181,23 @@ void encryption()
     }
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
-           printf("encryptedtext:\n");
-        for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
-        {
-            AES_ECB_encrypt(&ctx, textToEncrypt + i * (uint8_t)keyLength);
-        }
-        for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
-        {
-            phex( textToEncrypt + i * (uint8_t)keyLength);
-        }
+    printf("encryptedtext:\n");
+    for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
+    {
+        AES_ECB_encrypt(&ctx, textToEncrypt + i * (uint8_t)keyLength);
+    }
+    for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
+    {
+        phex(textToEncrypt + i * (uint8_t)keyLength);
+    }
 }
 
 void decryption()
 {
+    countNumberOfBlocksForDecryption();
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
-    uint8_t textToDecrypt[chartsNumber/2];
+    uint8_t textToDecrypt[chartsNumber / 2];
     printf("decryptedtext:\n");
     for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
     {
@@ -207,7 +206,6 @@ void decryption()
     printf(" original  \n");
     printuintToChar(textToDecrypt, chartsNumber);
     printf("\n");
-
 }
 
 int main()
@@ -229,8 +227,6 @@ int main()
         decryption();
         break;
     }
-
-    printf("\n");
     printf("\n process ended successfully \n");
     return 0;
 }
