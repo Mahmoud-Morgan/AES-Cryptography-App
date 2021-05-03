@@ -1,1 +1,1 @@
-Mahmoud
+Encryption algorithms, in general, are based in mathematics and can range from very simple to very complex processes depending on their design. In the case of symmetric encryption algorithms, they’re paired with a single key to convert readable (plaintext) data into unintelligible gibberish (ciphertext). They then use the same key to then decrypt the ciphertext back into plaintext. And all of this is done in a way that ensures data confidentiality and privacy. Pretty cool, huh?
