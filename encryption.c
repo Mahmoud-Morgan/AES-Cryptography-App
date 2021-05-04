@@ -168,6 +168,15 @@ void printuintToChar(uint8_t *codedText, int codedTextSize)
     }
 }
 
+void printUint(uint8_t *codedText, int codedTextSize)
+{
+    char content;
+    for (int i = 0; i < codedTextSize; i++)
+    {
+        printf("%x", codedText[i]);
+    }
+}
+
 void encryption()
 {
     countNumberOfBlocksForEncryption();
@@ -182,29 +191,47 @@ void encryption()
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
     printf("encryptedtext:\n");
-    for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
-    {
-        AES_ECB_encrypt(&ctx, textToEncrypt + i * (uint8_t)keyLength);
-    }
-    for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
-    {
-        phex(textToEncrypt + i * (uint8_t)keyLength);
-    }
+    AES_ECB_encrypt(&ctx, textToEncrypt);
+    size_t n = sizeof(textToEncrypt)/sizeof(textToEncrypt[0]);
+    printf("size = %d \n",n);
+    printUint(textToEncrypt,n);
+    printf("\n");
+    AES_ECB_decrypt(&ctx, textToEncrypt);
+    printuintToChar(textToEncrypt,chartsNumber);
+
+
+    
 }
 
 void decryption()
 {
     countNumberOfBlocksForDecryption();
+    uint8_t contant;
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
     uint8_t textToDecrypt[chartsNumber / 2];
-    printf("decryptedtext:\n");
-    for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
+    long int i =0;
+       while(!feof(inputFile))
     {
-        AES_ECB_decrypt(&ctx, textToDecrypt + i * (uint8_t)keyLength);
+        if (fscanf(inputFile,"%2hhx",&contant) == 1)
+        {
+            textToDecrypt[i] = contant;
+            i++;
+        }
     }
-    printf(" original  \n");
-    printuintToChar(textToDecrypt, chartsNumber);
+    size_t n = sizeof(textToDecrypt)/sizeof(textToDecrypt[0]);
+    printf("size Decrypt = %d \n",n);
+    printUint(textToDecrypt,n);
+    // printf("decryptedtext:\n");
+    // for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
+    // {
+    //     AES_ECB_decrypt(&ctx, textToDecrypt + i * (uint8_t)keyLength);
+    // }
+    // printf(" original  \n");
+    // printuintToChar(textToDecrypt, chartsNumber);
+    printf("\n");
+    AES_ECB_decrypt(&ctx, textToDecrypt);
+    printuintToChar(textToDecrypt,n);
     printf("\n");
 }
 
