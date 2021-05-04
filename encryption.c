@@ -19,7 +19,7 @@ const uint8_t len = 16;
 static const int keyLength = 16; // 128bit key
 static uint8_t encryptionKey[keyLength];
 static unsigned long long int chartsNumber;
-static unsigned long int numberOfBlocks;
+
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -81,50 +81,6 @@ void countCharts()
     printf("number of charts = %d \n", chartsNumber);
 }
 
-void countNumberOfBlocksForEncryption()
-{
-    if (fmod(chartsNumber, keyLength) == 0)
-    {
-        numberOfBlocks = (chartsNumber / keyLength);
-    }
-    else
-    {
-        numberOfBlocks = (chartsNumber / keyLength) + 1;
-    }
-    printf("Number Of Blocks For Encryption = %d \n", numberOfBlocks);
-}
-
-void countNumberOfBlocksForDecryption()
-{
-    if (fmod(chartsNumber, keyLength) != 0)
-    {
-        printf("please enter file that encrypted by this app \n");
-    }
-    numberOfBlocks = (chartsNumber / (2 * keyLength));
-    printf("Number Of Blocks For Decryption = %d \n", numberOfBlocks);
-}
-
-static void phex(uint8_t *str)
-{
-    for (int i = 0; i < keyLength; ++i)
-    {
-        printf("%.2x", str[i]);
-    }
-}
-
-uint8_t getPlainText(unsigned long long int *chartsNumber)
-{
-    uint8_t plainText[*chartsNumber];
-    char content;
-    unsigned long long int i = 0;
-    for (i = 0; i < *chartsNumber; i++)
-    {
-        content = fgetc(inputFile);
-        plainText[i] = content;
-    }
-    return *plainText;
-}
-
 FILE *getEncryptionKeyFile()
 {
     char filename[100];
@@ -170,7 +126,6 @@ void printuintToChar(uint8_t *codedText, int codedTextSize)
 
 void printUint(uint8_t *codedText, int codedTextSize)
 {
-    char content;
     for (int i = 0; i < codedTextSize; i++)
     {
         printf("%x", codedText[i]);
@@ -179,7 +134,6 @@ void printUint(uint8_t *codedText, int codedTextSize)
 
 void encryption()
 {
-    countNumberOfBlocksForEncryption();
     uint8_t textToEncrypt[chartsNumber];
     char content;
     unsigned long long int j = 0;
@@ -192,46 +146,29 @@ void encryption()
     AES_init_ctx(&ctx, encryptionKey);
     printf("encryptedtext:\n");
     AES_ECB_encrypt(&ctx, textToEncrypt);
-    size_t n = sizeof(textToEncrypt)/sizeof(textToEncrypt[0]);
-    printf("size = %d \n",n);
-    printUint(textToEncrypt,n);
+    size_t codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
+    printUint(textToEncrypt, codedTextSize);
     printf("\n");
-    AES_ECB_decrypt(&ctx, textToEncrypt);
-    printuintToChar(textToEncrypt,chartsNumber);
-
-
-    
 }
 
 void decryption()
 {
-    countNumberOfBlocksForDecryption();
-    uint8_t contant;
-    struct AES_ctx ctx;
-    AES_init_ctx(&ctx, encryptionKey);
     uint8_t textToDecrypt[chartsNumber / 2];
-    long int i =0;
-       while(!feof(inputFile))
+    long int i = 0;
+    uint8_t contant;
+    while (!feof(inputFile))
     {
-        if (fscanf(inputFile,"%2hhx",&contant) == 1)
+        if (fscanf(inputFile, "%2hhx", &contant) == 1)
         {
             textToDecrypt[i] = contant;
             i++;
         }
     }
-    size_t n = sizeof(textToDecrypt)/sizeof(textToDecrypt[0]);
-    printf("size Decrypt = %d \n",n);
-    printUint(textToDecrypt,n);
-    // printf("decryptedtext:\n");
-    // for (uint8_t i = (uint8_t)0; i < (uint8_t)numberOfBlocks; ++i)
-    // {
-    //     AES_ECB_decrypt(&ctx, textToDecrypt + i * (uint8_t)keyLength);
-    // }
-    // printf(" original  \n");
-    // printuintToChar(textToDecrypt, chartsNumber);
-    printf("\n");
+    struct AES_ctx ctx;
+    AES_init_ctx(&ctx, encryptionKey);
     AES_ECB_decrypt(&ctx, textToDecrypt);
-    printuintToChar(textToDecrypt,n);
+    size_t codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
+    printuintToChar(textToDecrypt, codedTextSize);
     printf("\n");
 }
 
