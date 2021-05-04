@@ -78,7 +78,7 @@ void countCharts()
         c = fgetc(inputFile);
     }
     rewind(inputFile);
-    printf("number of charts = %d \n", chartsNumber);
+    printf("number of charts = %llu  \n", chartsNumber);
 }
 
 FILE *getEncryptionKeyFile()
@@ -114,19 +114,21 @@ void getEncryptionKey(FILE *keyFile) // need length validation
     }
 }
 
-void printuintToChar(uint8_t *codedText, int codedTextSize)
+void printuintToChar(uint8_t *codedText, unsigned long long int  codedTextSize)
 {
     char content;
-    for (int i = 0; i < codedTextSize; i++)
+    unsigned long long int i;
+    for ( i = 0; i < codedTextSize; i++)
     {
         content = (char)codedText[i];
         printf("%c", content);
     }
 }
 
-void printUint(uint8_t *codedText, int codedTextSize)
+void printUint(uint8_t *codedText, unsigned long long int  codedTextSize)
 {
-    for (int i = 0; i < codedTextSize; i++)
+    unsigned long long int  i;
+    for ( i = 0; i < codedTextSize; i++)
     {
         printf("%x", codedText[i]);
     }
@@ -136,7 +138,7 @@ void encryption()
 {
     uint8_t textToEncrypt[chartsNumber];
     char content;
-    unsigned long long int j = 0;
+    unsigned long long int j = 0;   
     for (j = 0; j < chartsNumber; j++)
     {
         content = fgetc(inputFile);
@@ -146,15 +148,17 @@ void encryption()
     AES_init_ctx(&ctx, encryptionKey);
     printf("encryptedtext:\n");
     AES_ECB_encrypt(&ctx, textToEncrypt);
-    size_t codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
+    unsigned long long int  codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
+    printf("size of encrypted array = %llu \n",codedTextSize);
+    printf("\n \n \n");
     printUint(textToEncrypt, codedTextSize);
-    printf("\n");
+    printf("\n \n \n");
 }
 
 void decryption()
 {
     uint8_t textToDecrypt[chartsNumber / 2];
-    long int i = 0;
+    unsigned long long int  i = 0;
     uint8_t contant;
     while (!feof(inputFile))
     {
@@ -167,7 +171,7 @@ void decryption()
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
     AES_ECB_decrypt(&ctx, textToDecrypt);
-    size_t codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
+    unsigned long long int  codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
     printuintToChar(textToDecrypt, codedTextSize);
     printf("\n");
 }
