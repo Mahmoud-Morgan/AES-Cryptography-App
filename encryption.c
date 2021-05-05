@@ -17,9 +17,9 @@ const uint8_t len = 24;
 const uint8_t len = 16;
 #endif
 static const int keyLength = 16; // 128bit key
-static uint8_t encryptionKey[keyLength];
+static uint8_t encryptionKey[keyLength] = {(uint8_t) NULL };
 static unsigned long long int chartsNumber;
-
+static unsigned long int numberOfBlocks;
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -104,31 +104,74 @@ FILE *getEncryptionKeyFile()
     return keyFile;
 }
 
-void getEncryptionKey(FILE *keyFile) // need length validation
+void getEncryptionKey()
 {
-    char content;
-    for (int i = 0; i < keyLength; i++)
+    bool checkInput = false;
+    do
     {
+        FILE *keyFile = getEncryptionKeyFile();
+        char content;
+        int i = 0;
         content = fgetc(keyFile);
-        encryptionKey[i] = content;
-    }
+        while (content != EOF)
+        {
+            encryptionKey[i] = content;
+           content = fgetc(keyFile);
+           i++;
+           if(i>keyLength){
+               break;
+           }
+        }
+        if(i>keyLength){
+            printf("long key, pleas enter valid key file with length = %d \n", keyLength);
+            
+        }else if (i<=keyLength-1)
+        { 
+            printf("short key, pleas enter valid key file with length = %d \n", keyLength);
+        }else{
+            checkInput = true;
+        }
+    } while (checkInput == false);
 }
 
-void printuintToChar(uint8_t *codedText, unsigned long long int  codedTextSize)
+void countNumberOfBlocksForEncryption()
+{
+    if (fmod(chartsNumber, keyLength) == 0)
+    {
+        numberOfBlocks = (chartsNumber / keyLength);
+    }
+    else
+    {
+        numberOfBlocks = (chartsNumber / keyLength) + 1;
+    }
+    printf("Number Of Blocks For Encryption = %d \n", numberOfBlocks);
+}
+
+void countNumberOfBlocksForDecryption()
+{
+    if (fmod(chartsNumber, keyLength) != 0)
+    {
+        printf("please enter file that encrypted by this app \n");
+    }
+    numberOfBlocks = (chartsNumber / (2 * keyLength));
+    printf("Number Of Blocks For Decryption = %d \n", numberOfBlocks);
+}
+
+void printuintToChar(uint8_t *codedText, unsigned long long int codedTextSize)
 {
     char content;
     unsigned long long int i;
-    for ( i = 0; i < codedTextSize; i++)
+    for (i = 0; i < codedTextSize; i++)
     {
         content = (char)codedText[i];
         printf("%c", content);
     }
 }
 
-void printUint(uint8_t *codedText, unsigned long long int  codedTextSize)
+void printUint(uint8_t *codedText, unsigned long long int codedTextSize)
 {
-    unsigned long long int  i;
-    for ( i = 0; i < codedTextSize; i++)
+    unsigned long long int i;
+    for (i = 0; i < codedTextSize; i++)
     {
         printf("%x", codedText[i]);
     }
@@ -138,7 +181,7 @@ void encryption()
 {
     uint8_t textToEncrypt[chartsNumber];
     char content;
-    unsigned long long int j = 0;   
+    unsigned long long int j = 0;
     for (j = 0; j < chartsNumber; j++)
     {
         content = fgetc(inputFile);
@@ -148,9 +191,7 @@ void encryption()
     AES_init_ctx(&ctx, encryptionKey);
     printf("encryptedtext:\n");
     AES_ECB_encrypt(&ctx, textToEncrypt);
-    unsigned long long int  codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
-    printf("size of encrypted array = %llu \n",codedTextSize);
-    printf("\n \n \n");
+    unsigned long long int codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
     printUint(textToEncrypt, codedTextSize);
     printf("\n \n \n");
 }
@@ -158,7 +199,7 @@ void encryption()
 void decryption()
 {
     uint8_t textToDecrypt[chartsNumber / 2];
-    unsigned long long int  i = 0;
+    unsigned long long int i = 0;
     uint8_t contant;
     while (!feof(inputFile))
     {
@@ -171,7 +212,7 @@ void decryption()
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, encryptionKey);
     AES_ECB_decrypt(&ctx, textToDecrypt);
-    unsigned long long int  codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
+    unsigned long long int codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
     printuintToChar(textToDecrypt, codedTextSize);
     printf("\n");
 }
@@ -183,8 +224,7 @@ int main()
     getInputFile();
     countCharts();
 
-    FILE *KeyFile = getEncryptionKeyFile(); // 128bit key
-    getEncryptionKey(KeyFile);
+    getEncryptionKey();
 
     switch (checkEncryptOrDecrypt)
     {
