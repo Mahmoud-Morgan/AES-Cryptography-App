@@ -10,14 +10,14 @@ static char checkEncryptOrDecrypt;
 static FILE *inputFile;
 
 #if defined(AES256)
-const uint8_t len = 32;
+static const uint8_t keyLength = 32;
 #elif defined(AES192)
-const uint8_t len = 24;
+static const uint8_t keyLength = 24;
 #elif defined(AES128)
-const uint8_t len = 16;
-#endif
 static const int keyLength = 16; // 128bit key
-static uint8_t encryptionKey[keyLength] = {(uint8_t) NULL };
+#endif
+
+static uint8_t encryptionKey[keyLength] ;
 static unsigned long long int chartsNumber;
 static unsigned long int numberOfBlocks;
 
