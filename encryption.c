@@ -7,6 +7,7 @@
 #include "aes.c"
 
 static char checkEncryptOrDecrypt;
+static char inputFileName[100];
 static FILE *inputFile;
 
 #if defined(AES256)
@@ -48,17 +49,16 @@ void prpuosActionEncryptOrDecrypt()
 
 void getInputFile()
 {
-    char filename[100];
     bool checkInput = false;
     do
     {
         printf("Enter the filename to open for reading (max name length = 100) \n");
-        scanf("%s", filename);
+        scanf("%s", inputFileName);
         // Open one file for reading
-        inputFile = fopen(filename, "r");
+        inputFile = fopen(inputFileName, "r");
         if (inputFile == NULL)
         {
-            printf("Cannot open file %s \n", filename);
+            printf("Cannot open file %s \n", inputFileName);
         }
         else
         {
@@ -177,6 +177,26 @@ void printUint(uint8_t *codedText, unsigned long long int codedTextSize)
     }
 }
 
+void exportEncryptedFile(uint8_t *codedText,unsigned long long int codedTextSize)
+{
+    int inputFileNamelength = strlen(inputFileName);
+    int concatenatNamelength = strlen("_encrypted.txt");
+    int pathLength = inputFileNamelength+concatenatNamelength;
+    char path[pathLength];// file name length = 100 + 14 the additional concatenation 
+
+    strcpy(path,inputFileName);
+    strcat(path,"_encrypted.txt"); // length = 14
+    FILE *outputFile = fopen(path, "w+");
+    unsigned long long int i;
+    for (i = 0; i < codedTextSize; i++)
+    {
+        fprintf(outputFile,"%x", codedText[i]);
+    }
+    fclose(outputFile);
+
+    printf("\n File created and saved successfully. \n");
+}
+
 void encryption()
 {
     uint8_t textToEncrypt[chartsNumber];
@@ -193,6 +213,7 @@ void encryption()
     AES_ECB_encrypt(&ctx, textToEncrypt);
     unsigned long long int codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
     printUint(textToEncrypt, codedTextSize);
+    exportEncryptedFile(textToEncrypt, codedTextSize);
     printf("\n \n \n");
 }
 
