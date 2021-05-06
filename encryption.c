@@ -198,6 +198,27 @@ void exportEncryptedFile(uint8_t *codedText,unsigned long long int codedTextSize
     printf("\n File created and saved successfully. \n");
 }
 
+void exportDecryptedFile(uint8_t *codedText,unsigned long long int codedTextSize)
+{
+    char concatenatName[] = "_decrypted.txt" ;
+    int inputFileNamelength = strlen(inputFileName);
+    int concatenatNamelength = strlen(concatenatName);
+    int pathLength = inputFileNamelength+concatenatNamelength;
+    char path[pathLength]; 
+
+    strcpy(path,inputFileName);
+    strcat(path,concatenatName);
+    FILE *outputFile = fopen(path, "w+");
+    unsigned long long int i;
+    for (i = 0; i < codedTextSize; i++)
+    {
+        fprintf(outputFile,"%c", (char)codedText[i]);
+    }
+    fclose(outputFile);
+
+    printf("\n File created and saved successfully. \n");
+}
+
 void encryption()
 {
     uint8_t textToEncrypt[chartsNumber];
@@ -215,7 +236,7 @@ void encryption()
     unsigned long long int codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
     printUint(textToEncrypt, codedTextSize);
     exportEncryptedFile(textToEncrypt, codedTextSize);
-    printf("\n \n \n");
+    printf("\n");
 }
 
 void decryption()
@@ -236,6 +257,7 @@ void decryption()
     AES_ECB_decrypt(&ctx, textToDecrypt);
     unsigned long long int codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
     printuintToChar(textToDecrypt, codedTextSize);
+    exportDecryptedFile(textToDecrypt, codedTextSize);
     printf("\n");
 }
 
