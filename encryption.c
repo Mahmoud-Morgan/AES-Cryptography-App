@@ -179,13 +179,14 @@ void printUint(uint8_t *codedText, unsigned long long int codedTextSize)
 
 void exportEncryptedFile(uint8_t *codedText,unsigned long long int codedTextSize)
 {
+    char concatenatName[] = "_encrypted.txt" ;
     int inputFileNamelength = strlen(inputFileName);
-    int concatenatNamelength = strlen("_encrypted.txt");
+    int concatenatNamelength = strlen(concatenatName);
     int pathLength = inputFileNamelength+concatenatNamelength;
-    char path[pathLength];// file name length = 100 + 14 the additional concatenation 
+    char path[pathLength]; 
 
     strcpy(path,inputFileName);
-    strcat(path,"_encrypted.txt"); // length = 14
+    strcat(path,concatenatName);
     FILE *outputFile = fopen(path, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
