@@ -1,0 +1,1 @@
+Now imagine that something's wrong with doStuff and you need to take it down for maintenance. What happens if you temporarily comment out the second line?

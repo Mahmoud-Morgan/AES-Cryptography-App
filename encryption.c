@@ -88,7 +88,7 @@ FILE *getEncryptionKeyFile()
     bool checkInput = false;
     do
     {
-        printf("Enter the filename(max name length = 100)of the encryption Key (key length must = 16) \n");
+        printf("Enter the filename of the encryption Key (max name length = 100 / key length must = 16) \n");
         scanf("%s", filename);
         // Open one file for reading
         keyFile = fopen(filename, "r");
