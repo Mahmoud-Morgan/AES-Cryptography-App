@@ -18,7 +18,7 @@ static const uint8_t keyLength = 24;
 static const int keyLength = 16; // 128bit key
 #endif
 
-static uint8_t encryptionKey[keyLength] ;
+static uint8_t encryptionKey[16] ;
 static unsigned long long int chartsNumber;
 static unsigned long int numberOfBlocks;
 
@@ -144,7 +144,7 @@ void countNumberOfBlocksForEncryption()
     {
         numberOfBlocks = (chartsNumber / keyLength) + 1;
     }
-    printf("Number Of Blocks For Encryption = %d \n", numberOfBlocks);
+    printf("Number Of Blocks For Encryption = %ld \n", numberOfBlocks);
 }
 
 void countNumberOfBlocksForDecryption()
@@ -154,7 +154,7 @@ void countNumberOfBlocksForDecryption()
         printf("please enter file that encrypted by this app \n");
     }
     numberOfBlocks = (chartsNumber / (2 * keyLength));
-    printf("Number Of Blocks For Decryption = %d \n", numberOfBlocks);
+    printf("Number Of Blocks For Decryption = %ld \n", numberOfBlocks);
 }
 
 void printuintToChar(uint8_t *codedText, unsigned long long int codedTextSize)
