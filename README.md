@@ -1,5 +1,5 @@
 # AES-Cryptography-App
-A console application is written with C programming language for encrypting/decrypting text files by Advanced Encryption Standard (AES).
+A console application is written in C programming language for encrypting/decrypting text files by Advanced Encryption Standard (AES).
 
 ### Library
 using [kokke/tiny-AES-c](https://github.com/kokke/tiny-AES-c) implementation of the AES ECB, CTR and CBC encryption algorithms written in C.
