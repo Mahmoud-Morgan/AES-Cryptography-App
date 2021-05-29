@@ -19,7 +19,7 @@ static const int keyLength = 16; // 128bit key
 #endif
 
 static uint8_t encryptionKey[16] ;
-static unsigned long long int chartsNumber;
+static unsigned long long int charsNumber;
 static unsigned long int numberOfBlocks;
 
 void prpuosActionEncryptOrDecrypt()
@@ -67,18 +67,18 @@ void getInputFile()
     } while (checkInput == false);
 }
 
-void countCharts()
+void countChars()
 {
-    chartsNumber = 0;
+    charsNumber = 0;
     char c;
     c = fgetc(inputFile);
     while (c != EOF)
     {
-        chartsNumber++;
+        charsNumber++;
         c = fgetc(inputFile);
     }
     rewind(inputFile);
-    printf("number of charts = %llu  \n", chartsNumber);
+    printf("number of chars = %llu  \n", charsNumber);
 }
 
 FILE *getEncryptionKeyFile()
@@ -136,24 +136,24 @@ void getEncryptionKey()
 
 void countNumberOfBlocksForEncryption()
 {
-    if (fmod(chartsNumber, keyLength) == 0)
+    if (fmod(charsNumber, keyLength) == 0)
     {
-        numberOfBlocks = (chartsNumber / keyLength);
+        numberOfBlocks = (charsNumber / keyLength);
     }
     else
     {
-        numberOfBlocks = (chartsNumber / keyLength) + 1;
+        numberOfBlocks = (charsNumber / keyLength) + 1;
     }
     printf("Number Of Blocks For Encryption = %ld \n", numberOfBlocks);
 }
 
 void countNumberOfBlocksForDecryption()
 {
-    if (fmod(chartsNumber, keyLength) != 0)
+    if (fmod(charsNumber, keyLength) != 0)
     {
         printf("please enter file that encrypted by this app \n");
     }
-    numberOfBlocks = (chartsNumber / (2 * keyLength));
+    numberOfBlocks = (charsNumber / (2 * keyLength));
     printf("Number Of Blocks For Decryption = %ld \n", numberOfBlocks);
 }
 
@@ -221,10 +221,10 @@ void exportDecryptedFile(uint8_t *codedText,unsigned long long int codedTextSize
 
 void encryption()
 {
-    uint8_t textToEncrypt[chartsNumber];
+    uint8_t textToEncrypt[charsNumber];
     char content;
     unsigned long long int j = 0;
-    for (j = 0; j < chartsNumber; j++)
+    for (j = 0; j < charsNumber; j++)
     {
         content = fgetc(inputFile);
         textToEncrypt[j] = content;
@@ -241,7 +241,7 @@ void encryption()
 
 void decryption()
 {
-    uint8_t textToDecrypt[chartsNumber / 2];
+    uint8_t textToDecrypt[charsNumber / 2];
     unsigned long long int i = 0;
     uint8_t contant;
     while (!feof(inputFile))
@@ -266,7 +266,7 @@ int main()
     prpuosActionEncryptOrDecrypt();
 
     getInputFile();
-    countCharts();
+    countChars();
 
     getEncryptionKey();
 
