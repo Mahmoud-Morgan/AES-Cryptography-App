@@ -3,10 +3,12 @@
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
+//#include <pthread.h>
 #include "aes.h"
 #include "aes.c"
 
 static char checkEncryptOrDecrypt;
+static char checkDirectoryOrFile;
 static char inputFileName[100];
 static FILE *inputFile;
 
@@ -18,7 +20,7 @@ static const uint8_t keyLength = 24;
 static const int keyLength = 16; // 128bit key
 #endif
 
-static uint8_t encryptionKey[16] ;
+static uint8_t encryptionKey[16];
 static unsigned long long int charsNumber;
 static unsigned long int numberOfBlocks;
 
@@ -94,7 +96,7 @@ FILE *getEncryptionKeyFile()
         keyFile = fopen(filename, "r");
         if (keyFile == NULL)
         {
-            printf("Cannot open file %s \n", filename);
+            printf("Cannot open filexx %s \n", filename);
         }
         else
         {
@@ -116,19 +118,23 @@ void getEncryptionKey()
         while (content != EOF)
         {
             encryptionKey[i] = content;
-           content = fgetc(keyFile);
-           i++;
-           if(i>keyLength){
-               break;
-           }
+            content = fgetc(keyFile);
+            i++;
+            if (i > keyLength)
+            {
+                break;
+            }
         }
-        if(i>keyLength){
+        if (i > keyLength)
+        {
             printf("long key, pleas enter valid key file with length = %d \n", keyLength);
-            
-        }else if (i<=keyLength-1)
-        { 
+        }
+        else if (i <= keyLength - 1)
+        {
             printf("short key, pleas enter valid key file with length = %d \n", keyLength);
-        }else{
+        }
+        else
+        {
             checkInput = true;
         }
     } while (checkInput == false);
@@ -177,42 +183,42 @@ void printUint(uint8_t *codedText, unsigned long long int codedTextSize)
     }
 }
 
-void exportEncryptedFile(uint8_t *codedText,unsigned long long int codedTextSize)
+void exportEncryptedFile(uint8_t *codedText, unsigned long long int codedTextSize)
 {
-    char concatenatName[] = "_encrypted.txt" ;
+    char concatenatName[] = "_encrypted.txt";
     int inputFileNamelength = strlen(inputFileName);
     int concatenatNamelength = strlen(concatenatName);
-    int pathLength = inputFileNamelength+concatenatNamelength;
-    char path[pathLength]; 
+    int pathLength = inputFileNamelength + concatenatNamelength;
+    char path[pathLength];
 
-    strcpy(path,inputFileName);
-    strcat(path,concatenatName);
+    strcpy(path, inputFileName);
+    strcat(path, concatenatName);
     FILE *outputFile = fopen(path, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
     {
-        fprintf(outputFile,"%x", codedText[i]);
+        fprintf(outputFile, "%x", codedText[i]);
     }
     fclose(outputFile);
 
     printf("\n File created and saved successfully. \n");
 }
 
-void exportDecryptedFile(uint8_t *codedText,unsigned long long int codedTextSize)
+void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSize)
 {
-    char concatenatName[] = "_decrypted.txt" ;
+    char concatenatName[] = "_decrypted.txt";
     int inputFileNamelength = strlen(inputFileName);
     int concatenatNamelength = strlen(concatenatName);
-    int pathLength = inputFileNamelength+concatenatNamelength;
-    char path[pathLength]; 
+    int pathLength = inputFileNamelength + concatenatNamelength;
+    char path[pathLength];
 
-    strcpy(path,inputFileName);
-    strcat(path,concatenatName);
+    strcpy(path, inputFileName);
+    strcat(path, concatenatName);
     FILE *outputFile = fopen(path, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
     {
-        fprintf(outputFile,"%c", (char)codedText[i]);
+        fprintf(outputFile, "%c", (char)codedText[i]);
     }
     fclose(outputFile);
 
@@ -261,15 +267,35 @@ void decryption()
     printf("\n");
 }
 
-int main()
+void handleFileOrDirectory()
 {
-    prpuosActionEncryptOrDecrypt();
+    bool checkInput = false;
+    do
+    {
+        printf("for hanling all file in directory pleas enter ( d )\nfor hanling a spasifc file pleas enter ( f ) \n \n");
+        scanf(" %s", &checkDirectoryOrFile);
+        printf("entered chart = %c \n", checkDirectoryOrFile);
+        if (checkDirectoryOrFile == 'd' || checkDirectoryOrFile == 'f')
+        {
+            checkInput = true;
+        }
+    } while (checkInput == false);
 
+    switch (checkDirectoryOrFile)
+    {
+    case 'd':
+        printf("the process will act on all files in the directory ... \n\n");
+        break;
+    case 'f':
+        printf("the process will act on a spasifc file ... \n\n");
+        break;
+    }
+}
+
+void handlingFileProcess()
+{
     getInputFile();
     countChars();
-
-    getEncryptionKey();
-
     switch (checkEncryptOrDecrypt)
     {
     case 'e':
@@ -279,6 +305,23 @@ int main()
         decryption();
         break;
     }
+}
+
+int main()
+{
+    prpuosActionEncryptOrDecrypt();
+    getEncryptionKey();
+    handleFileOrDirectory();
+    switch (checkDirectoryOrFile)
+    {
+    case 'd':
+
+        break;
+    case 'f':
+        handlingFileProcess();
+        break;
+    }
+
     printf("\n process ended successfully \n");
     return 0;
 }
