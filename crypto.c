@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
-//#include <pthread.h>
+#include <pthread.h>
 #include <dirent.h>
 #include "aes.h"
 #include "aes.c"
@@ -24,7 +24,6 @@ static const int keyLength = 16; // 128bit key
 
 static uint8_t encryptionKey[16];
 static unsigned long long int charsNumber;
-static unsigned long int numberOfBlocks;
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -141,29 +140,6 @@ void getEncryptionKey()
             checkInput = true;
         }
     } while (checkInput == false);
-}
-
-void countNumberOfBlocksForEncryption()
-{
-    if (fmod(charsNumber, keyLength) == 0)
-    {
-        numberOfBlocks = (charsNumber / keyLength);
-    }
-    else
-    {
-        numberOfBlocks = (charsNumber / keyLength) + 1;
-    }
-    printf("Number Of Blocks For Encryption = %ld \n", numberOfBlocks);
-}
-
-void countNumberOfBlocksForDecryption()
-{
-    if (fmod(charsNumber, keyLength) != 0)
-    {
-        printf("please enter file that encrypted by this app \n");
-    }
-    numberOfBlocks = (charsNumber / (2 * keyLength));
-    printf("Number Of Blocks For Decryption = %ld \n", numberOfBlocks);
 }
 
 void printuintToChar(uint8_t *codedText, unsigned long long int codedTextSize)
@@ -342,6 +318,36 @@ DIR *getDirectory()
 void handlingAllFilesInDirectoryProcess()
 {
     DIR *directory = getDirectory();
+    int numberOfFiles = 0;
+    struct dirent *dir;
+        if (directory)
+    {
+        while ((dir = readdir(directory)) != NULL)
+        {
+            printf("%s\n", dir->d_name);
+        }
+        numberOfFiles++;
+    }
+    rewinddir(directory);
+
+    pthread_t th[numberOfFiles];
+    FILE *files[numberOfFiles];
+
+    for (size_t i = 0; i < numberOfFiles; i++)
+    {
+        if (pthread_create(&th[i], NULL, &routine, NULL) != 0)
+        {
+            return 1;
+        }
+    }
+
+    for (size_t i = 0; i < numberOfFiles; i++)
+    {
+        if (pthread_join(th[i], NULL) != 0)
+        {
+            return 5;
+        }
+    }
 
     closedir(directory);
 }
