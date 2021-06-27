@@ -291,11 +291,8 @@ void handleFileOrDirectory()
         break;
     }
 }
-
-void handlingFileProcess()
+void encryptOrDecryptSwitcher()
 {
-    getInputFile();
-    countChars();
     switch (checkEncryptOrDecrypt)
     {
     case 'e':
@@ -306,6 +303,15 @@ void handlingFileProcess()
         break;
     }
 }
+
+void handlingFileProcess()
+{
+    getInputFile();
+    countChars();
+    encryptOrDecryptSwitcher();
+}
+
+
 
 int main()
 {
