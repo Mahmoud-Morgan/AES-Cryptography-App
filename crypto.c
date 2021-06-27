@@ -4,6 +4,7 @@
 #include <math.h>
 #include <inttypes.h>
 //#include <pthread.h>
+#include <dirent.h>
 #include "aes.h"
 #include "aes.c"
 
@@ -11,6 +12,7 @@ static char checkEncryptOrDecrypt;
 static char checkDirectoryOrFile;
 static char inputFileName[100];
 static FILE *inputFile;
+
 
 #if defined(AES256)
 static const uint8_t keyLength = 32;
@@ -96,10 +98,11 @@ FILE *getEncryptionKeyFile()
         keyFile = fopen(filename, "r");
         if (keyFile == NULL)
         {
-            printf("Cannot open filexx %s \n", filename);
+            printf("Cannot open file %s \n", filename);
         }
         else
         {
+            printf(" %s file is opened as a key file \n\n", filename);
             checkInput = true;
         }
     } while (checkInput == false);
@@ -291,6 +294,7 @@ void handleFileOrDirectory()
         break;
     }
 }
+
 void encryptOrDecryptSwitcher()
 {
     switch (checkEncryptOrDecrypt)
@@ -312,6 +316,35 @@ void handlingFileProcess()
 }
 
 
+DIR *getDirectory()
+{
+    DIR *directory;
+    char directoryName[200];
+    bool checkInput = false;
+    do
+    {
+        printf("Enter the directory extantion (max name length = 200) \n");
+        scanf("%s", directoryName);
+        directory = opendir(directoryName);
+        if (directory == NULL)
+        {
+            printf("Cannot open directory %s \n", directoryName);
+        }
+        else
+        {
+            printf(" %s directory is opened \n", directoryName);
+            checkInput = true;
+        }
+    } while (checkInput == false);
+    return directory;
+}
+
+void handlingAllFilesInDirectoryProcess()
+{
+    DIR *directory = getDirectory();
+
+    closedir(directory);
+}
 
 int main()
 {
@@ -321,7 +354,7 @@ int main()
     switch (checkDirectoryOrFile)
     {
     case 'd':
-
+        handlingAllFilesInDirectoryProcess();
         break;
     case 'f':
         handlingFileProcess();
