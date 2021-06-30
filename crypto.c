@@ -23,7 +23,7 @@ static const int keyLength = 16; // 128bit key
 #endif
 
 static uint8_t encryptionKey[16];
-static unsigned long long int charsNumber;
+ 
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -71,9 +71,8 @@ FILE *getInputFile()
     return inputFile;
 }
 
-void countChars(FILE *inputFile)
-{
-    charsNumber = 0;
+unsigned long long int countChars(FILE *inputFile)
+{   unsigned long long int charsNumber = 0;
     char c;
     c = fgetc(inputFile);
     while (c != EOF)
@@ -83,6 +82,7 @@ void countChars(FILE *inputFile)
     }
     rewind(inputFile);
     printf("number of chars = %llu  \n", charsNumber);
+    return charsNumber;
 }
 
 FILE *getEncryptionKeyFile()
@@ -206,7 +206,7 @@ void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSiz
 }
 
 void encryption(FILE *inputFile)
-{
+{   unsigned long long int charsNumber = countChars(inputFile);
     uint8_t textToEncrypt[charsNumber];
     char content;
     unsigned long long int j = 0;
@@ -226,7 +226,7 @@ void encryption(FILE *inputFile)
 }
 
 void decryption(FILE *inputFile)
-{
+{   unsigned long long int charsNumber = countChars(inputFile);
     uint8_t textToDecrypt[charsNumber / 2];
     unsigned long long int i = 0;
     uint8_t contant;
