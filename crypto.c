@@ -12,8 +12,6 @@ static char checkEncryptOrDecrypt;
 static char checkDirectoryOrFile;
 static char inputFileName[100];
 
-
-
 #if defined(AES256)
 static const uint8_t keyLength = 32;
 #elif defined(AES192)
@@ -287,9 +285,7 @@ void encryptOrDecryptSwitcher(FILE *inputFile)
 
 void handlingFileProcess()
 {
- 
     FILE *inputFile = getInputFile();
-    countChars(inputFile);
     encryptOrDecryptSwitcher(inputFile);
 }
 
