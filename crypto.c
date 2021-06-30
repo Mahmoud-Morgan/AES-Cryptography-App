@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
-#include <pthread.h>
+//#include <pthread.h>
 #include <dirent.h>
 #include "aes.h"
 #include "aes.c"
@@ -11,7 +11,7 @@
 static char checkEncryptOrDecrypt;
 static char checkDirectoryOrFile;
 static char inputFileName[100];
-static FILE *inputFile;
+
 
 
 #if defined(AES256)
@@ -50,8 +50,8 @@ void prpuosActionEncryptOrDecrypt()
     }
 }
 
-void getInputFile()
-{
+FILE *getInputFile()
+{   FILE *inputFile;
     bool checkInput = false;
     do
     {
@@ -68,9 +68,10 @@ void getInputFile()
             checkInput = true;
         }
     } while (checkInput == false);
+    return inputFile;
 }
 
-void countChars()
+void countChars(FILE *inputFile)
 {
     charsNumber = 0;
     char c;
@@ -204,7 +205,7 @@ void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSiz
     printf("\n File created and saved successfully. \n");
 }
 
-void encryption()
+void encryption(FILE *inputFile)
 {
     uint8_t textToEncrypt[charsNumber];
     char content;
@@ -224,7 +225,7 @@ void encryption()
     printf("\n");
 }
 
-void decryption()
+void decryption(FILE *inputFile)
 {
     uint8_t textToDecrypt[charsNumber / 2];
     unsigned long long int i = 0;
@@ -271,26 +272,26 @@ void handleFileOrDirectory()
     }
 }
 
-void encryptOrDecryptSwitcher()
+void encryptOrDecryptSwitcher(FILE *inputFile)
 {
     switch (checkEncryptOrDecrypt)
     {
     case 'e':
-        encryption();
+        encryption(inputFile);
         break;
     case 'd':
-        decryption();
+        decryption(inputFile);
         break;
     }
 }
 
 void handlingFileProcess()
 {
-    getInputFile();
-    countChars();
-    encryptOrDecryptSwitcher();
+ 
+    FILE *inputFile = getInputFile();
+    countChars(inputFile);
+    encryptOrDecryptSwitcher(inputFile);
 }
-
 
 DIR *getDirectory()
 {
@@ -315,42 +316,42 @@ DIR *getDirectory()
     return directory;
 }
 
-void handlingAllFilesInDirectoryProcess()
-{
-    DIR *directory = getDirectory();
-    int numberOfFiles = 0;
-    struct dirent *dir;
-        if (directory)
-    {
-        while ((dir = readdir(directory)) != NULL)
-        {
-            printf("%s\n", dir->d_name);
-        }
-        numberOfFiles++;
-    }
-    rewinddir(directory);
+// void handlingAllFilesInDirectoryProcess()
+// {
+//     DIR *directory = getDirectory();
+//     int numberOfFiles = 0;
+//     struct dirent *dir;
+//         if (directory)
+//     {
+//         while ((dir = readdir(directory)) != NULL)
+//         {
+//             printf("%s\n", dir->d_name);
+//         }
+//         numberOfFiles++;
+//     }
+//     rewinddir(directory);
 
-    pthread_t th[numberOfFiles];
-    FILE *files[numberOfFiles];
+//     pthread_t th[numberOfFiles];
+//     FILE *files[numberOfFiles];
 
-    for (size_t i = 0; i < numberOfFiles; i++)
-    {
-        if (pthread_create(&th[i], NULL, &routine, NULL) != 0)
-        {
-            return 1;
-        }
-    }
+//     for (size_t i = 0; i < numberOfFiles; i++)
+//     {
+//         if (pthread_create(&th[i], NULL, &routine, NULL) != 0)
+//         {
+//             return 1;
+//         }
+//     }
 
-    for (size_t i = 0; i < numberOfFiles; i++)
-    {
-        if (pthread_join(th[i], NULL) != 0)
-        {
-            return 5;
-        }
-    }
+//     for (size_t i = 0; i < numberOfFiles; i++)
+//     {
+//         if (pthread_join(th[i], NULL) != 0)
+//         {
+//             return 5;
+//         }
+//     }
 
-    closedir(directory);
-}
+//     closedir(directory);
+// }
 
 int main()
 {
@@ -360,13 +361,12 @@ int main()
     switch (checkDirectoryOrFile)
     {
     case 'd':
-        handlingAllFilesInDirectoryProcess();
+       // handlingAllFilesInDirectoryProcess();
         break;
     case 'f':
         handlingFileProcess();
         break;
     }
-
     printf("\n process ended successfully \n");
     return 0;
 }
