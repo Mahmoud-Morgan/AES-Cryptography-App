@@ -3,14 +3,19 @@
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
+#include <libgen.h>
 //#include <pthread.h>
 #include <dirent.h>
 #include "aes.h"
 #include "aes.c"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 static char checkEncryptOrDecrypt;
 static char checkDirectoryOrFile;
 static char inputFileName[100];
+static char directoryName[100];
 
 #if defined(AES256)
 static const uint8_t keyLength = 32;
@@ -21,7 +26,6 @@ static const int keyLength = 16; // 128bit key
 #endif
 
 static uint8_t encryptionKey[16];
- 
 
 void prpuosActionEncryptOrDecrypt()
 {
@@ -49,7 +53,8 @@ void prpuosActionEncryptOrDecrypt()
 }
 
 FILE *getInputFile()
-{   FILE *inputFile;
+{
+    FILE *inputFile;
     bool checkInput = false;
     do
     {
@@ -70,7 +75,8 @@ FILE *getInputFile()
 }
 
 unsigned long long int countChars(FILE *inputFile)
-{   unsigned long long int charsNumber = 0;
+{
+    unsigned long long int charsNumber = 0;
     char c;
     c = fgetc(inputFile);
     while (c != EOF)
@@ -204,7 +210,8 @@ void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSiz
 }
 
 void encryption(FILE *inputFile)
-{   unsigned long long int charsNumber = countChars(inputFile);
+{
+    unsigned long long int charsNumber = countChars(inputFile);
     uint8_t textToEncrypt[charsNumber];
     char content;
     unsigned long long int j = 0;
@@ -224,7 +231,8 @@ void encryption(FILE *inputFile)
 }
 
 void decryption(FILE *inputFile)
-{   unsigned long long int charsNumber = countChars(inputFile);
+{
+    unsigned long long int charsNumber = countChars(inputFile);
     uint8_t textToDecrypt[charsNumber / 2];
     unsigned long long int i = 0;
     uint8_t contant;
@@ -292,7 +300,6 @@ void handlingFileProcess()
 DIR *getDirectory()
 {
     DIR *directory;
-    char directoryName[200];
     bool checkInput = false;
     do
     {
@@ -317,44 +324,44 @@ void handlingAllFilesInDirectoryProcess()
     DIR *directory = getDirectory();
     int numberOfFiles = 0;
     struct dirent *dir;
+    FILE *inputFile;
+    pid_t child_pid, w_pid;
+    int status = 0;
     if (directory)
     {
         while ((dir = readdir(directory)) != NULL)
         {
             if (dir->d_type != DT_REG)
-            continue;
+                continue;
             char *last = strrchr(dir->d_name, '.');
-            if(last+1 != NULL && strcmp(last+1,"txt") == 0 ){
+            if (last + 1 != NULL && strcmp(last + 1, "txt") == 0)
+            {
                 printf("%s\n", dir->d_name);
-                printf("Last token: %s\n", last+1);
-                numberOfFiles++;
+                printf("Last token: %s\n", last + 1);
+                if ((child_pid = fork()) == 0)
+                {
+                    char filePath[100];
+                    strcpy(inputFileName,dir->d_name);
+                    strcpy(filePath,directoryName);
+                    strcat(filePath,"/");
+                    strcat(filePath,inputFileName);
+                    printf(": %s \n", filePath);
+                    inputFile = fopen(filePath, "r");
+                    if (inputFile == NULL)
+                    {
+                        printf("Cannot open file %s \n", inputFileName);
+                    }else{
+                        encryptOrDecryptSwitcher(inputFile);
+                      //  numberOfFiles++;
+                    }
+                    exit(0);
+                }
             }
         }
-        
+       
     }
+    while ((w_pid = wait(&status)) > 0);
     rewinddir(directory);
-    printf("number of files = %d \n",numberOfFiles);
-
-//     pthread_t th[numberOfFiles];
-//     FILE *files[numberOfFiles];
-
-//     for (size_t i = 0; i < numberOfFiles; i++)
-//     {
-//         if (pthread_create(&th[i], NULL, &routine, NULL) != 0)
-//         {
-//             return 1;
-//         }
-//     }
-
-//     for (size_t i = 0; i < numberOfFiles; i++)
-//     {
-//         if (pthread_join(th[i], NULL) != 0)
-//         {
-//             return 5;
-//         }
-//     }
-
-//     closedir(directory);
 }
 
 int main()
