@@ -312,20 +312,28 @@ DIR *getDirectory()
     return directory;
 }
 
-// void handlingAllFilesInDirectoryProcess()
-// {
-//     DIR *directory = getDirectory();
-//     int numberOfFiles = 0;
-//     struct dirent *dir;
-//         if (directory)
-//     {
-//         while ((dir = readdir(directory)) != NULL)
-//         {
-//             printf("%s\n", dir->d_name);
-//         }
-//         numberOfFiles++;
-//     }
-//     rewinddir(directory);
+void handlingAllFilesInDirectoryProcess()
+{
+    DIR *directory = getDirectory();
+    int numberOfFiles = 0;
+    struct dirent *dir;
+    if (directory)
+    {
+        while ((dir = readdir(directory)) != NULL)
+        {
+            if (dir->d_type != DT_REG)
+            continue;
+            char *last = strrchr(dir->d_name, '.');
+            if(last+1 != NULL && strcmp(last+1,"txt") == 0 ){
+                printf("%s\n", dir->d_name);
+                printf("Last token: %s\n", last+1);
+                numberOfFiles++;
+            }
+        }
+        
+    }
+    rewinddir(directory);
+    printf("number of files = %d \n",numberOfFiles);
 
 //     pthread_t th[numberOfFiles];
 //     FILE *files[numberOfFiles];
@@ -347,7 +355,7 @@ DIR *getDirectory()
 //     }
 
 //     closedir(directory);
-// }
+}
 
 int main()
 {
@@ -357,7 +365,7 @@ int main()
     switch (checkDirectoryOrFile)
     {
     case 'd':
-       // handlingAllFilesInDirectoryProcess();
+        handlingAllFilesInDirectoryProcess();
         break;
     case 'f':
         handlingFileProcess();
