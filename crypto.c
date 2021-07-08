@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 static char checkEncryptOrDecrypt;
 static char checkDirectoryOrFile;
@@ -170,14 +172,26 @@ void printUint(uint8_t *codedText, unsigned long long int codedTextSize)
 void exportEncryptedFile(uint8_t *codedText, unsigned long long int codedTextSize)
 {
     char concatenatName[] = "_encrypted.txt";
-    int inputFileNamelength = strlen(inputFileName);
-    int concatenatNamelength = strlen(concatenatName);
-    int pathLength = inputFileNamelength + concatenatNamelength;
-    char path[pathLength];
+    int directoryNameLength = strlen(directoryName);
+    int inputFileNameLength = strlen(inputFileName);
+    int concatenatNameLength = strlen(concatenatName);
+    int newFileNameLength = directoryNameLength + inputFileNameLength + concatenatNameLength +1;
+    char newFileName[newFileNameLength];
 
-    strcpy(path, inputFileName);
-    strcat(path, concatenatName);
-    FILE *outputFile = fopen(path, "w+");
+    if (directoryNameLength > 0)
+    {
+        strcpy(newFileName, directoryName);
+        strcat(newFileName, "_");
+        strcat(newFileName, inputFileName);
+        strcat(newFileName, concatenatName);
+    }
+    else
+    {
+        strcpy(newFileName, inputFileName);
+        strcat(newFileName, concatenatName);
+    }
+
+    FILE *outputFile = fopen(newFileName, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
     {
@@ -191,14 +205,27 @@ void exportEncryptedFile(uint8_t *codedText, unsigned long long int codedTextSiz
 void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSize)
 {
     char concatenatName[] = "_decrypted.txt";
-    int inputFileNamelength = strlen(inputFileName);
-    int concatenatNamelength = strlen(concatenatName);
-    int pathLength = inputFileNamelength + concatenatNamelength;
-    char path[pathLength];
+    int directoryNameLength = strlen(directoryName);
+    int inputFileNameLength = strlen(inputFileName);
+    int concatenatNameLength = strlen(concatenatName);
+    int newFileNameLength = directoryNameLength + inputFileNameLength + concatenatNameLength +1;
+    char newFileName[newFileNameLength];
 
-    strcpy(path, inputFileName);
-    strcat(path, concatenatName);
-    FILE *outputFile = fopen(path, "w+");
+
+    if (directoryNameLength > 0)
+    {
+        strcpy(newFileName, directoryName);
+        strcat(newFileName, "_");
+        strcat(newFileName, inputFileName);
+        strcat(newFileName, concatenatName);
+    }
+    else
+    {
+        strcpy(newFileName, inputFileName);
+        strcat(newFileName, concatenatName);
+    }
+
+    FILE *outputFile = fopen(newFileName, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
     {
@@ -225,7 +252,7 @@ void encryption(FILE *inputFile)
     printf("encryptedtext:\n");
     AES_ECB_encrypt(&ctx, textToEncrypt);
     unsigned long long int codedTextSize = sizeof(textToEncrypt) / sizeof(textToEncrypt[0]);
-    printUint(textToEncrypt, codedTextSize);
+   // printUint(textToEncrypt, codedTextSize);
     exportEncryptedFile(textToEncrypt, codedTextSize);
     printf("\n");
 }
@@ -248,7 +275,7 @@ void decryption(FILE *inputFile)
     AES_init_ctx(&ctx, encryptionKey);
     AES_ECB_decrypt(&ctx, textToDecrypt);
     unsigned long long int codedTextSize = sizeof(textToDecrypt) / sizeof(textToDecrypt[0]);
-    printuintToChar(textToDecrypt, codedTextSize);
+  //  printuintToChar(textToDecrypt, codedTextSize);
     exportDecryptedFile(textToDecrypt, codedTextSize);
     printf("\n");
 }
@@ -295,6 +322,7 @@ void handlingFileProcess()
 {
     FILE *inputFile = getInputFile();
     encryptOrDecryptSwitcher(inputFile);
+    fclose(inputFile);
 }
 
 DIR *getDirectory()
@@ -335,33 +363,33 @@ void handlingAllFilesInDirectoryProcess()
                 continue;
             char *last = strrchr(dir->d_name, '.');
             if (last + 1 != NULL && strcmp(last + 1, "txt") == 0)
-            {
-                printf("%s\n", dir->d_name);
-                printf("Last token: %s\n", last + 1);
+            {   numberOfFiles++;
                 if ((child_pid = fork()) == 0)
                 {
                     char filePath[100];
-                    strcpy(inputFileName,dir->d_name);
-                    strcpy(filePath,directoryName);
-                    strcat(filePath,"/");
-                    strcat(filePath,inputFileName);
-                    printf(": %s \n", filePath);
+                    strcpy(inputFileName, dir->d_name);
+                    strcpy(filePath, directoryName);
+                    strcat(filePath, "/");
+                    strcat(filePath, inputFileName);
+                    printf("filePath: %s \n", filePath);
                     inputFile = fopen(filePath, "r");
                     if (inputFile == NULL)
                     {
                         printf("Cannot open file %s \n", inputFileName);
-                    }else{
-                        encryptOrDecryptSwitcher(inputFile);
-                      //  numberOfFiles++;
                     }
+                    else
+                    {
+                        encryptOrDecryptSwitcher(inputFile);
+                    }
+                    fclose(inputFile);
                     exit(0);
                 }
             }
         }
-       
     }
     while ((w_pid = wait(&status)) > 0);
     rewinddir(directory);
+    closedir(directory);
 }
 
 int main()
