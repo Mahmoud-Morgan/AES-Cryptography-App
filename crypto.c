@@ -285,7 +285,7 @@ void handleFileOrDirectory()
     bool checkInput = false;
     do
     {
-        printf("for hanling all file in directory pleas enter ( d )\nfor hanling a spasifc file pleas enter ( f ) \n \n");
+        printf("for handling all files in directory pleas enter ( d )\nfor handling a spasifc file pleas enter ( f ) \n \n");
         scanf(" %s", &checkDirectoryOrFile);
         printf("entered chart = %c \n", checkDirectoryOrFile);
         if (checkDirectoryOrFile == 'd' || checkDirectoryOrFile == 'f')
