@@ -224,13 +224,14 @@ void exportDecryptedFile(uint8_t *codedText, unsigned long long int codedTextSiz
         strcpy(newFileName, inputFileName);
         strcat(newFileName, concatenatName);
     }
-
+   
     FILE *outputFile = fopen(newFileName, "w+");
     unsigned long long int i;
     for (i = 0; i < codedTextSize; i++)
     {
         fprintf(outputFile, "%c", (char)codedText[i]);
     }
+    rewind(outputFile);
     fclose(outputFile);
 
     printf("\n File created and saved successfully. \n");
@@ -260,6 +261,7 @@ void encryption(FILE *inputFile)
 void decryption(FILE *inputFile)
 {
     unsigned long long int charsNumber = countChars(inputFile);
+   
     uint8_t textToDecrypt[charsNumber / 2];
     unsigned long long int i = 0;
     uint8_t contant;
@@ -269,6 +271,10 @@ void decryption(FILE *inputFile)
         {
             textToDecrypt[i] = contant;
             i++;
+            printf("i = %d\n",i);
+        }else{
+            printf("this file not encrypted by this app \n");
+            exit(0);
         }
     }
     struct AES_ctx ctx;
@@ -378,9 +384,10 @@ void handlingAllFilesInDirectoryProcess()
                         printf("Cannot open file %s \n", inputFileName);
                     }
                     else
-                    {
+                    {rewind(inputFile);
                         encryptOrDecryptSwitcher(inputFile);
                     }
+                    rewind(inputFile);
                     fclose(inputFile);
                     exit(0);
                 }
@@ -388,6 +395,9 @@ void handlingAllFilesInDirectoryProcess()
         }
     }
     while ((w_pid = wait(&status)) > 0);
+    // {
+    //     printf("w_pid = %d , status = %d \n",w_pid,status);
+    // }
     rewinddir(directory);
     closedir(directory);
 }
